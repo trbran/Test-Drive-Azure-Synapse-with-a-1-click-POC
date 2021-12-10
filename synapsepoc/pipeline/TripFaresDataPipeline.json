@@ -473,7 +473,7 @@
 			},
 			"SQLLoginUsername": {
 				"type": "string",
-				"defaultValue": "sqladmin"
+				"defaultValue": "trbran"
 			},
 			"KeyVaultName": {
 				"type": "string",
