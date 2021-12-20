@@ -1,0 +1,17 @@
+{
+	"name": "hack_license input",
+	"properties": {
+		"content": {
+			"query": "-- This is auto-generated code\nSELECT\n    count(*)\nFROM\n    OPENROWSET(\n        BULK 'https://nicc44rwhz6evlbepoc.dfs.core.windows.net/public/trip-data.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\n-- distinct 49999\n-- distinct medallion = 5859    taxi løyve\n-- distinct hack_license = 8457     taxi sjåfør\n\n-- ldw\n-- [asb].[DimCustomer] to align\n\nSELECT TOP (100) [CustomerKey] as [Hack_License]\n,[FirstName]\n,[MiddleName]\n,[LastName]\n, RTRIM(LTRIM(\n        CONCAT(\n            COALESCE(FirstName + ' ', '')\n            , COALESCE(MiddleName + ' ', '')\n            , COALESCE(LastName, '')\n        )\n    )) AS Name\n,[BirthDate]\n,[MaritalStatus]\n,[Gender]\n,[EmailAddress]\n,[Education]\n,[Phone]\n FROM [asb].[DimCustomer]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
