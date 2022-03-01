@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "\nInput\n\nCopy to clipboard\n{\n    \"source\": {\n        \"type\": \"SqlDWSource\",\n        \"sqlReaderQuery\": \"IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'tripFares')\\nBEGIN\\nEXEC('CREATE SCHEMA tripFares')\\nselect Count(*) from sys.symmetric_keys;\\nEND\\nELSE\\nBEGIN\\n    select Count(*) from sys.symmetric_keys;\\nEND\",\n        \"queryTimeout\": \"02:00:00\",\n        \"partitionOption\": \"None\"\n    },\n    \"dataset\": {\n        \"referenceName\": \"azureSynapseAnalyticsSchema\",\n        \"type\": \"DatasetReference\",\n        \"parameters\": {\n            \"SynapseWorkspaceName\": \"dyn57zksoyjqw5ykpocws1\",\n            \"SQLDedicatedPoolName\": \"dyn57zksoyjqw5ykpocws1p1\",\n            \"keyVaultName\": \"kvdyn57zksoyjqw5ykpoc\",\n            \"SQLLoginUsername\": \"sqladmin\"\n        }\n    },\n    \"firstRowOnly\": false\n}",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
