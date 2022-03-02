@@ -511,7 +511,7 @@
 					},
 					"SynapseWorkspaceName": {
 						"type": "string",
-						"defaultValue": "dyn57zksoyjqw5ykpocws1"
+						"defaultValue": "dyn57zksoyjqw5ykpocws1.database.windows.net"
 					},
 					"SQLDedicatedPoolName": {
 						"type": "string",
@@ -1297,6 +1297,26 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/create customer table')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] \n\tWITH ( FORMAT_TYPE = DELIMITEDTEXT ,\n\t       FORMAT_OPTIONS (\n\t\t\t FIELD_TERMINATOR = '|',\n\t\t\t USE_TYPE_DEFAULT = FALSE\n\t\t\t))\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'tpcds_dyn57zksoyjqw5ykpoc_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [tpcds_dyn57zksoyjqw5ykpoc_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://tpcds@dyn57zksoyjqw5ykpoc.dfs.core.windows.net' \n\t)\nGO\n\nCREATE EXTERNAL TABLE customer (\n        c_customer_sk             integer                       ,\n        c_customer_id             char(16)                      ,\n        c_current_cdemo_sk        integer                       ,\n        c_current_hdemo_sk        integer                       ,\n        c_current_addr_sk         integer                       ,\n        c_first_shipto_date_sk    integer                       ,\n        c_first_sales_date_sk     integer                       ,\n        c_salutation              char(10)                      ,\n        c_first_name              char(20)                      ,\n        c_last_name               char(30)                      ,\n        c_preferred_cust_flag     char(1)                       ,\n        c_birth_day               integer                       ,\n        c_birth_month             integer                       ,\n        c_birth_year              integer                       ,\n        c_birth_country           varchar(20)                   ,\n        c_login                   char(13)                      ,\n        c_email_address           char(50)                      ,\n        c_last_review_date        char(10)            \n\t)\n\tWITH (\n\tLOCATION = 'customer/customer_1_24.csv',\n\tDATA_SOURCE = [tpcds_dyn57zksoyjqw5ykpoc_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseDelimitedTextFormat]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM dbo.customer\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "tpcds",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/hack_license input')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
@@ -1336,14 +1356,13 @@
 					"conf": {
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
-						"spark.dynamicAllocation.maxExecutors": "2"
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "751e3a83-ce43-45d4-a9fc-a5cda98c0d48"
 					}
 				},
 				"metadata": {
 					"saveOutput": true,
-					"synapse_widget": {
-						"version": "0.1"
-					},
+					"enableDebugMode": false,
 					"kernelspec": {
 						"name": "synapse_pyspark",
 						"display_name": "Synapse PySpark"
@@ -1352,10 +1371,10 @@
 						"name": "python"
 					},
 					"a365ComputeOptions": {
-						"id": "/subscriptions/4eeedd72-d937-4243-86d1-c3982a84d924/resourceGroups/nashahzsfin/providers/Microsoft.Synapse/workspaces/mfstspdjvzuh3xeu2pocws1/bigDataPools/ws1sparkpool1",
+						"id": "/subscriptions/862b6819-3333-4c47-949b-e46122f3fa65/resourceGroups/dynugno/providers/Microsoft.Synapse/workspaces/dyn57zksoyjqw5ykpocws1/bigDataPools/ws1sparkpool1",
 						"name": "ws1sparkpool1",
 						"type": "Spark",
-						"endpoint": "https://mfstspdjvzuh3xeu2pocws1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/ws1sparkpool1",
+						"endpoint": "https://dyn57zksoyjqw5ykpocws1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/ws1sparkpool1",
 						"auth": {
 							"type": "AAD",
 							"authResource": "https://dev.azuresynapse.net"
@@ -1622,7 +1641,47 @@
 							"print(\"Area under ROC = %s\" % metrics.areaUnderROC)"
 						],
 						"outputs": [],
-						"execution_count": 10
+						"execution_count": 9
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"df = predictions.select(\"totalAmount\", \"fareAmount\", \"tipAmount\", \"paymentType\", \"passengerCount\", \"tripDistance\", \"weekdayString\", \"pickupHour\", \"tripTimeSecs\", \"tipped\", \"trafficTimeBins\", \"prediction\")\r\n",
+							"df.write.mode(\"overwrite\").saveAsTable(\"default.predictions\")"
+						],
+						"outputs": [],
+						"execution_count": 13
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": false
+						},
+						"source": [
+							"display(predictions)    "
+						],
+						"outputs": [],
+						"execution_count": 12
 					},
 					{
 						"cell_type": "markdown",
@@ -1647,7 +1706,7 @@
 							"plt.show()"
 						],
 						"outputs": [],
-						"execution_count": null
+						"execution_count": 10
 					}
 				]
 			},
@@ -1670,15 +1729,6 @@
 			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/ws1sparkpool1')]",
-			"type": "Microsoft.Synapse/workspaces/bigDataPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": []
-			},
 			"dependsOn": []
 		}
 	]
